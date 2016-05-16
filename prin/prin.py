@@ -12,6 +12,9 @@ import argparse
 
 import numpy as np
 
+import toolz as tz
+from toolz import curried as c
+
 from matplotlib import cm
 import networkx as nx
 
@@ -57,9 +60,10 @@ def network_properties(network : nx.DiGraph) -> pd.DataFrame:
     conn = max(nx.connected_components(network.to_undirected()), key=len)
     conn = nx.subgraph(network, conn)
     pr = compute_pagerank(conn)
-    indeg = np.fromiter(conn.in_degree_iter(), dtype='float', count=len(conn))
-    names = nx.nodes()
     description = [conn.node[n]['description'] for n in names]
+    indeg = np.fromiter(tz.pipe(conn.in_degree_iter(),
+                                c.pluck(1)), dtype='float', count=len(conn))
+    names = nx.nodes(conn)
     data = {'name': names,
             'in-degree': indeg,
             'pagerank': pr,
