@@ -36,7 +36,7 @@ def _describe_record(rec):
         authors = ' & '.join(authors)
     else:
         authors = authors[0] + ' et al.'
-    desc = authors + ', ' + rec['year'] + '. ', + rec['title']
+    desc = authors + ', ' + rec['year'] + '. ' + rec['title']
     return desc
 
 
