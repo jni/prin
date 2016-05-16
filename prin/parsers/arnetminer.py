@@ -29,7 +29,8 @@ MAXINT = np.iinfo(np.int32).max
 
 
 def _describe_record(rec):
-    authors = [auth.split()[-1] for auth in rec['authors']]
+    authors = [auth.split()[-1] for auth in rec['authors']
+               if any(map(str.isalpha, auth))]
     if len(authors) == 0:
         authors = ''
     elif len(authors) == 1:
