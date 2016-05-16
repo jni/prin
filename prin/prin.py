@@ -118,10 +118,10 @@ def main(argv):
     print('reading network data')
     network = parser(args.datafile, max_num_nodes=args.max_num_nodes)
     print('extracting data')
-
+    df = network_properties(network)
     print('preparing plots')
-    bokeh_plot(df)
+    bokeh_plot(df, output=args.output_file)
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main(sys.argv[1:])
