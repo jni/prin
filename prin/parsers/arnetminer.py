@@ -64,7 +64,7 @@ def get_record(linestup, ignore_abstracts=True):
         if kind == 'reference':
             record['references'].append(data)
         elif kind == 'authors':
-            record[kind] = data.split(',')
+            record[kind] = data.split(', ')
         else:
             record[kind] = data
     record['description'] = _describe_record(record)
