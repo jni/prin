@@ -60,7 +60,12 @@ def network_properties(network : nx.DiGraph) -> pd.DataFrame:
     indeg = np.fromiter(conn.in_degree_iter(), dtype='float', count=len(conn))
     names = nx.nodes()
     description = [conn.node[n]['description'] for n in names]
-    # TODO: Finish this function
+    data = {'name': names,
+            'in-degree': indeg,
+            'pagerank': pr,
+            'description': description}
+    df = pd.DataFrame(data, index=names)
+    return df
 
 
 def _bokeh_colormap(series, cmap='viridis', stretch=True):
