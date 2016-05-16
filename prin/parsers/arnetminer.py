@@ -2,6 +2,8 @@ import io
 import re
 import networkx as nx
 import numpy as np
+import toolz as tz
+from toolz import curried as c
 
 
 flagdict = {
@@ -26,11 +28,9 @@ rexp = r'^#(?P<flag>\*|@|t|c|index|%|!)\s*(?P<data>.*)$'
 MAXINT = np.iinfo(np.int32).max
 
 
-def get_record(fileobj, ignore_abstracts=True):
+def get_record(linestup, ignore_abstracts=True):
     record = {}
-    for line in fileobj:
-        if not line.strip():  # empty line indicates new block, abort
-            break
+    for line in linestup:
         m = re.match(rexp, line)
         if m is None:
             raise ValueError('failed regex matching for line:\n%s' % line)
@@ -47,18 +47,26 @@ def get_record(fileobj, ignore_abstracts=True):
     return record
 
 
+def _line_is_empty(line):
+    return len(line.strip()) == 0
+
+
 def txt_parser(filelike, max_num_nodes=MAXINT):
     if isinstance(filelike, io.IOBase):
         fileobj = filelike
     else:  # assume filename
         fileobj = open(filelike, 'r')
     g = nx.DiGraph()
-    for i, record in enumerate(map(get_record, fileobj)):
+    # this pipe assumes there are no empty lines at the start of the file
+    records = tz.pipe(fileobj,
+                      c.partitionby(_line_is_empty),  # split on empty lines
+                      c.take_nth(2),  # discard those empty lines
+                      c.take(max_num_nodes),
+                      c.map(get_record))
+    for record in records:
         g.add_node(record['index'], attr_dict=record)
         for reference in record.get('references', []):
             g.add_edge(record['index'], reference)
-        if i > max_num_nodes:
-            break
     return g
 
 
