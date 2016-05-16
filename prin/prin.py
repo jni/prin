@@ -111,10 +111,8 @@ def main(argv):
     args = _argument_parser().parse_args(argv)
     from . import parsers
     parser = getattr(parsers, args.format).parser
-
-    print('reading images')
-    images = io.imread_collection(argv[1:],
-                                  conserve_memory=False, plugin='tifffile')
+    print('reading network data')
+    network = parser(args.data_file, max_num_nodes=args.max_num_nodes)
     print('extracting data')
 
     print('preparing plots')

@@ -1,6 +1,7 @@
 import io
 import re
 import networkx as nx
+import numpy as np
 
 
 flagdict = {
@@ -20,6 +21,9 @@ flagdict = {
 # - Ignore intervening whitespace
 # - Capture the rest of the line into the 'data' group.
 rexp = r'^#(?P<flag>\*|@|t|c|index|%|!)\s*(?P<data>.*)$'
+
+
+MAXINT = np.iinfo(np.int32).max
 
 
 def get_record(fileobj, ignore_abstracts=True):
@@ -43,33 +47,35 @@ def get_record(fileobj, ignore_abstracts=True):
     return record
 
 
-def txt_parser(filelike):
+def txt_parser(filelike, max_num_nodes=MAXINT):
     if isinstance(filelike, io.IOBase):
         fileobj = filelike
     else:  # assume filename
         fileobj = open(filelike, 'r')
     g = nx.DiGraph()
-    for record in map(get_record, fileobj):
+    for i, record in enumerate(map(get_record, fileobj)):
         g.add_node(record['index'], attr_dict=record)
         for reference in record.get('references', []):
             g.add_edge(record['index'], reference)
+        if i > max_num_nodes:
+            break
     return g
 
 
-def tar_parser(filename):
+def tar_parser(filename, max_num_nodes=MAXINT):
     import tarfile
     tf = tarfile.open(filename, 'r')
     inner = tf.getnames()[0]  # assume single file
     fileobj = tf.extractfile(inner)
-    g = txt_parser(fileobj)
+    g = txt_parser(fileobj, max_num_nodes)
     return g
 
 
-def parser(filename):
+def parser(filename, max_num_nodes=MAXINT):
     if filename.endswith('.tar.gz') or filename.endswith('.tgz'):
-        g = tar_parser(filename)
+        g = tar_parser(filename, max_num_nodes)
     elif filename.endswith('.txt'):
-        g = txt_parser(filename)
+        g = txt_parser(filename, max_num_nodes)
     else:
         raise ValueError('Unknown file extension for ArnetMiner in %s, '
                          'use ".tar.gz", ".tgz", or ".txt".' % filename)
