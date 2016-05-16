@@ -83,6 +83,8 @@ def _argument_parser():
     parser.add_argument('-f', '--format', help='What format/parser to use.')
     parser.add_argument('-o', '--output-file', help='HTML file for plot.',
                         default='plot.html')
+    parser.add_argument('-n', '--max-num-nodes', type=int, default=int(1e7),
+                        help='Limit number of nodes read.')
     return parser
 
 
