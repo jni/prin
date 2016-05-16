@@ -28,6 +28,18 @@ rexp = r'^#(?P<flag>\*|@|t|c|index|%|!)\s*(?P<data>.*)$'
 MAXINT = np.iinfo(np.int32).max
 
 
+def _describe_record(rec):
+    authors = [auth.split()[-1] for auth in rec['authors']]
+    if len(authors) == 1:
+        authors = authors[0]
+    elif len(authors) == 2:
+        authors = ' & '.join(authors)
+    else:
+        authors = authors[0] + ' et al.'
+    desc = authors + ', ' + rec['year'] + '. ', + rec['title']
+    return desc
+
+
 def get_record(linestup, ignore_abstracts=True):
     record = {}
     for line in linestup:
@@ -44,6 +56,7 @@ def get_record(linestup, ignore_abstracts=True):
             record[kind] = data.split(',')
         else:
             record[kind] = data
+    record['description'] = _describe_record(record)
     return record
 
 
