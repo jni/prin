@@ -30,7 +30,9 @@ MAXINT = np.iinfo(np.int32).max
 
 def _describe_record(rec):
     authors = [auth.split()[-1] for auth in rec['authors']]
-    if len(authors) == 1:
+    if len(authors) == 0:
+        authors = ''
+    elif len(authors) == 1:
         authors = authors[0]
     elif len(authors) == 2:
         authors = ' & '.join(authors)
@@ -40,8 +42,17 @@ def _describe_record(rec):
     return desc
 
 
-def get_record(linestup, ignore_abstracts=True):
+def _default_record():
     record = {}
+    for key in ['title', 'year', 'journal', 'abstract']:
+        record[key] = ''
+    for key in ['authors', 'references']:
+        record[key] = []
+    return record
+
+
+def get_record(linestup, ignore_abstracts=True):
+    record = _default_record()
     for line in linestup:
         m = re.match(rexp, line)
         if m is None:
@@ -51,7 +62,7 @@ def get_record(linestup, ignore_abstracts=True):
         if kind == 'abstract' and ignore_abstracts:
             continue
         if kind == 'reference':
-            record.setdefault('references', []).append(data)
+            record['references'].append(data)
         elif kind == 'authors':
             record[kind] = data.split(',')
         else:
