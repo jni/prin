@@ -65,7 +65,7 @@ def network_properties(network : nx.DiGraph) -> pd.DataFrame:
     names = nx.nodes(conn)
     description = [conn.node[n].get('description', '') for n in names]
     data = {'name': names,
-            'in-degree': indeg,
+            'in_degree': indeg,
             'pagerank': pr,
             'description': description}
     df = pd.DataFrame(data, index=names)
@@ -96,7 +96,7 @@ def bokeh_plot(df, output='plot.html', color=None):
     tooltip = [('name', '@name'),
                ('description', '@description'),
                ('pagerank', '@pagerank'),
-               ('in-degree', '@in-degree')]
+               ('in-degree', '@in_degree')]
     if color is not None:
         df['color'] = _bokeh_colormap(df[color])
     source = ColumnDataSource(df)
@@ -105,9 +105,9 @@ def bokeh_plot(df, output='plot.html', color=None):
     tools = [t() for t in TOOLS] + [hover]
     pagerank = bplot.figure(tools=tools)
     if color is not None:
-        pagerank.circle('in-degree', 'pagerank', color='color', source=source)
+        pagerank.circle('in_degree', 'pagerank', color='color', source=source)
     else:
-        pagerank.circle('in-degree', 'pagerank', source=source)
+        pagerank.circle('in_degree', 'pagerank', source=source)
     bplot.show(pagerank)
 
 
