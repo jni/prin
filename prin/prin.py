@@ -56,7 +56,9 @@ def compute_pagerank(network : nx.DiGraph):
     return pr
 
 
-def network_properties(network : nx.DiGraph) -> pd.DataFrame:
+def network_properties(network : nx.DiGraph,
+                       in_degree_threshold : float,
+                       pagerank_threshold : float) -> pd.DataFrame:
     conn = max(nx.connected_components(network.to_undirected()), key=len)
     conn = nx.subgraph(network, conn)
     pr = compute_pagerank(conn)
@@ -69,6 +71,8 @@ def network_properties(network : nx.DiGraph) -> pd.DataFrame:
             'pagerank': pr,
             'description': description}
     df = pd.DataFrame(data, index=names)
+    df = df[df['pagerank'] > pagerank_threshold / len(names)]
+    df = df[df['in_degree'] > in_degree_threshold]
     return df
 
 
@@ -89,6 +93,12 @@ def _argument_parser():
                         default='plot.html')
     parser.add_argument('-n', '--max-num-nodes', type=int, default=int(1e7),
                         help='Limit number of nodes read.')
+    parser.add_argument('-t', '--in-degree-threshold', type=float, default=100,
+                        help='Do not plot nodes with smaller in-degree')
+    parser.add_argument('-T', '--pagerank-threshold', type=float, default=0,
+                        help='Do not plot nodes with smaller pagerank. '
+                             'This threshold is divided by the total number '
+                             'of nodes.')
     return parser
 
 
@@ -118,7 +128,9 @@ def main(argv):
     print('reading network data')
     network = parser(args.datafile, max_num_nodes=args.max_num_nodes)
     print('extracting data')
-    df = network_properties(network)
+    df = network_properties(network,
+                            in_degree_threshold=args.in_degree_threshold,
+                            pagerank_threshold=args.pagerank_threshold)
     print('preparing plots')
     bokeh_plot(df, output=args.output_file)
 
