@@ -64,14 +64,19 @@ def _line_is_empty(line):
     return len(line.strip()) == 0
 
 
+def _decode(bytesline):
+    return bytesline.decode('utf-8')
+
+
 def txt_parser(filelike, max_num_nodes=MAXINT):
     if isinstance(filelike, io.IOBase):
         fileobj = filelike
     else:  # assume filename
-        fileobj = open(filelike, 'r')
+        fileobj = open(filelike, 'rb')
     g = nx.DiGraph()
     # this pipe assumes there are no empty lines at the start of the file
     records = tz.pipe(fileobj,
+                      c.map(_decode),
                       c.partitionby(_line_is_empty),  # split on empty lines
                       c.take_nth(2),  # discard those empty lines
                       c.take(max_num_nodes),
