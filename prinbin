@@ -1,0 +1,5 @@
+import sys
+
+from prin import prin
+
+prin.main(sys.argv[1:])
