@@ -83,7 +83,7 @@ def _bokeh_colormap(series, cmap='viridis', stretch=True):
 
 def _argument_parser():
     parser = argparse.ArgumentParser('prin', description=__doc__)
-    parser.add_argument('data-file', help='File containing network data.')
+    parser.add_argument('datafile', help='File containing network data.')
     parser.add_argument('-f', '--format', help='What format/parser to use.')
     parser.add_argument('-o', '--output-file', help='HTML file for plot.',
                         default='plot.html')
@@ -116,7 +116,7 @@ def main(argv):
     from . import parsers
     parser = getattr(parsers, args.format).parser
     print('reading network data')
-    network = parser(args.data_file, max_num_nodes=args.max_num_nodes)
+    network = parser(args.datafile, max_num_nodes=args.max_num_nodes)
     print('extracting data')
 
     print('preparing plots')
