@@ -99,10 +99,13 @@ def _argument_parser():
                         help='Do not plot nodes with smaller pagerank. '
                              'This threshold is divided by the total number '
                              'of nodes.')
+    parser.add_argument('-l', '--linear', action='store_false', dest='loglog',
+                        default=True, help='Use a linear, not log-log, '
+                                           'scale for the scatterplot')
     return parser
 
 
-def bokeh_plot(df, output='plot.html', color=None):
+def bokeh_plot(df, output='plot.html', color=None, loglog=True):
     tooltip = [('name', '@name'),
                ('description', '@description'),
                ('pagerank', '@pagerank'),
@@ -113,7 +116,12 @@ def bokeh_plot(df, output='plot.html', color=None):
     bplot.output_file(output)
     hover = HoverTool(tooltips=tooltip)
     tools = [t() for t in TOOLS] + [hover]
-    pagerank = bplot.figure(tools=tools)
+    if loglog:
+        yaxis = xaxis = 'log'
+    else:
+        yaxis = xaxis = 'linear'
+    pagerank = bplot.figure(tools=tools,
+                            x_axis_type=xaxis, y_axis_type=yaxis)
     if color is not None:
         pagerank.circle('in_degree', 'pagerank', color='color', source=source)
     else:
@@ -132,7 +140,7 @@ def main(argv):
                             in_degree_threshold=args.in_degree_threshold,
                             pagerank_threshold=args.pagerank_threshold)
     print('preparing plots')
-    bokeh_plot(df, output=args.output_file)
+    bokeh_plot(df, output=args.output_file, loglog=args.loglog)
 
 
 if __name__ == '__main__':
