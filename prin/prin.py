@@ -95,9 +95,9 @@ def _argument_parser():
                         default='plot.html')
     parser.add_argument('-n', '--max-num-nodes', type=int, default=int(1e7),
                         help='Limit number of nodes read.')
-    parser.add_argument('-t', '--in-degree-threshold', type=float, default=100,
+    parser.add_argument('-t', '--in-degree-threshold', type=float, default=-1,
                         help='Do not plot nodes with smaller in-degree')
-    parser.add_argument('-T', '--pagerank-threshold', type=float, default=0,
+    parser.add_argument('-T', '--pagerank-threshold', type=float, default=-1,
                         help='Do not plot nodes with smaller pagerank. '
                              'This threshold is divided by the total number '
                              'of nodes.')
