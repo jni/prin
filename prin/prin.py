@@ -57,8 +57,8 @@ def compute_pagerank(network : nx.DiGraph):
 
 
 def network_properties(network : nx.DiGraph,
-                       in_degree_threshold : float,
-                       pagerank_threshold : float,
+                       in_degree_threshold : float = -1,
+                       pagerank_threshold : float = -1,
                        values=[]) -> pd.DataFrame:
     conn = max(nx.connected_components(network.to_undirected()), key=len)
     conn = nx.subgraph(network, conn)
