@@ -63,12 +63,10 @@ def network_properties(network : nx.DiGraph,
     conn = max(nx.connected_components(network.to_undirected()), key=len)
     conn = nx.subgraph(network, conn)
     pr = compute_pagerank(conn)
-    indeg = np.fromiter(tz.pipe(conn.in_degree_iter(),
-                                c.pluck(1)), dtype='float', count=len(conn))
-    odeg = np.fromiter(tz.pipe(conn.out_degree_iter(),
-                               c.pluck(1)), dtype='float', count=len(conn))
     names = nx.nodes(conn)
-    description = [conn.node[n].get('description', '') for n in names]
+    indeg = [conn.in_degree(n) for n in names]
+    odeg = [conn.out_degree(n) for n in names]
+    description = [conn.node[n].get('description', n) for n in names]
     data = {'id': names,
             'in_degree': indeg,
             'out_degree': odeg,
