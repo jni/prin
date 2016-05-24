@@ -58,16 +58,20 @@ def compute_pagerank(network : nx.DiGraph):
 
 def network_properties(network : nx.DiGraph,
                        in_degree_threshold : float,
-                       pagerank_threshold : float) -> pd.DataFrame:
+                       pagerank_threshold : float,
+                       values=[]) -> pd.DataFrame:
     conn = max(nx.connected_components(network.to_undirected()), key=len)
     conn = nx.subgraph(network, conn)
     pr = compute_pagerank(conn)
     indeg = np.fromiter(tz.pipe(conn.in_degree_iter(),
                                 c.pluck(1)), dtype='float', count=len(conn))
+    odeg = np.fromiter(tz.pipe(conn.out_degree_iter(),
+                               c.pluck(1)), dtype='float', count=len(conn))
     names = nx.nodes(conn)
     description = [conn.node[n].get('description', '') for n in names]
-    data = {'name': names,
+    data = {'id': names,
             'in_degree': indeg,
+            'out_degree': odeg,
             'pagerank': pr,
             'description': description}
     df = pd.DataFrame(data, index=names)
@@ -106,7 +110,7 @@ def _argument_parser():
 
 
 def bokeh_plot(df, output='plot.html', color=None, loglog=True):
-    tooltip = [('name', '@name'),
+    tooltip = [('name', '@id'),
                ('description', '@description'),
                ('pagerank', '@pagerank'),
                ('in-degree', '@in_degree')]
