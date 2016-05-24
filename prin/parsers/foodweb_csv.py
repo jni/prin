@@ -3,7 +3,7 @@ import networkx as nx
 
 def parser(filename_root, *args, **kwargs):
     filename_network = filename_root + '.csv'
-    network_np = np.loadtxt(filename_network, 'int', delimiter=',')
+    network_np = np.loadtxt(filename_network, 'int', delimiter=',').T
     network_nx = nx.from_numpy_matrix(network_np, create_using=nx.DiGraph())
     filename_species = filename_root + '.species.txt'
     try:
