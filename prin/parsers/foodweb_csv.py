@@ -8,7 +8,7 @@ def parser(filename_root, *args, **kwargs):
     filename_species = filename_root + '.species.txt'
     try:
         with open(filename_species, 'r') as fin:
-            mapping = dict(enumerate(fin))
+            mapping = dict(enumerate(map(str.strip, fin)))
         nx.relabel_nodes(network_nx, mapping=mapping, copy=False)
     except FileNotFoundError:
         print('No species name file found: %s' % filename_species)
