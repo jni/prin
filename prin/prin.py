@@ -6,11 +6,11 @@ and hold them up as examples of PR success.
 
 Based on experience these are hard to come by. =P
 """
-import os
 import sys
 import argparse
 
 import numpy as np
+import feather
 
 import toolz as tz
 from toolz import curried as c
@@ -148,7 +148,7 @@ def main(argv):
                             pagerank_threshold=args.pagerank_threshold,
                             damping=args.damping)
     if args.data_frame is not None:
-        df.to_csv(args.data_frame)
+        feather.write_dataframe(df, args.data_frame)
     print('preparing plots')
     bokeh_plot(df, output=args.output_file, loglog=args.loglog)
 
