@@ -107,6 +107,8 @@ def _argument_parser():
                                            'scale for the scatterplot')
     parser.add_argument('-d', '--damping', type=float, default=0.85,
                         help='Damping value for pagerank computation.')
+    parser.add_argument('-D', '--data-frame', type=str,
+                        help='Save resulting data frame to this file.')
     return parser
 
 
@@ -145,6 +147,8 @@ def main(argv):
                             in_degree_threshold=args.in_degree_threshold,
                             pagerank_threshold=args.pagerank_threshold,
                             damping=args.damping)
+    if args.data_frame is not None:
+        df.to_csv(args.data_frame)
     print('preparing plots')
     bokeh_plot(df, output=args.output_file, loglog=args.loglog)
 
