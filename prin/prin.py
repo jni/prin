@@ -47,22 +47,23 @@ def pagerank_power(Trans, damping=0.85, max_iter=int(1e5)):
     return r
 
 
-def compute_pagerank(network : nx.DiGraph):
+def compute_pagerank(network : nx.DiGraph, damping : float=0.85):
     Adj = nx.to_scipy_sparse_matrix(network, dtype='float', format='csr')
     deg = np.ravel(Adj.sum(axis=1))
     Dinv = sparse.diags(1 / deg)
     Trans = (Dinv @ Adj).T
-    pr = pagerank_power(Trans)
+    pr = pagerank_power(Trans, damping=damping)
     return pr
 
 
 def network_properties(network : nx.DiGraph,
                        in_degree_threshold : float = -1,
                        pagerank_threshold : float = -1,
+                       damping : float = 0.85,
                        values=[]) -> pd.DataFrame:
     conn = max(nx.connected_components(network.to_undirected()), key=len)
     conn = nx.subgraph(network, conn)
-    pr = compute_pagerank(conn)
+    pr = compute_pagerank(conn, damping=damping)
     names = nx.nodes(conn)
     indeg = [conn.in_degree(n) for n in names]
     odeg = [conn.out_degree(n) for n in names]
@@ -104,6 +105,8 @@ def _argument_parser():
     parser.add_argument('-l', '--linear', action='store_false', dest='loglog',
                         default=True, help='Use a linear, not log-log, '
                                            'scale for the scatterplot')
+    parser.add_argument('-d', '--damping', type=float, default=0.85,
+                        help='Damping value for pagerank computation.')
     return parser
 
 
@@ -140,7 +143,8 @@ def main(argv):
     print('extracting data')
     df = network_properties(network,
                             in_degree_threshold=args.in_degree_threshold,
-                            pagerank_threshold=args.pagerank_threshold)
+                            pagerank_threshold=args.pagerank_threshold,
+                            damping=args.damping)
     print('preparing plots')
     bokeh_plot(df, output=args.output_file, loglog=args.loglog)
 
