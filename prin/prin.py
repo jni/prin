@@ -6,6 +6,7 @@ and hold them up as examples of PR success.
 
 Based on experience these are hard to come by. =P
 """
+import os
 import sys
 import argparse
 
@@ -138,15 +139,18 @@ def bokeh_plot(df, output='plot.html', color=None, loglog=True):
 
 def main(argv):
     args = _argument_parser().parse_args(argv)
-    from . import parsers
-    parser = getattr(parsers, args.format).parser
-    print('reading network data')
-    network = parser(args.datafile, max_num_nodes=args.max_num_nodes)
-    print('extracting data')
-    df = network_properties(network,
-                            in_degree_threshold=args.in_degree_threshold,
-                            pagerank_threshold=args.pagerank_threshold,
-                            damping=args.damping)
+    if args.data_frame is not None and os.path.exists(args.data_frame):
+        df = feather.read_dataframe(args.data_frame)
+    else:
+        from . import parsers
+        parser = getattr(parsers, args.format).parser
+        print('reading network data')
+        network = parser(args.datafile, max_num_nodes=args.max_num_nodes)
+        print('extracting data')
+        df = network_properties(network,
+                                in_degree_threshold=args.in_degree_threshold,
+                                pagerank_threshold=args.pagerank_threshold,
+                                damping=args.damping)
     if args.data_frame is not None:
         feather.write_dataframe(df, args.data_frame)
     print('preparing plots')
