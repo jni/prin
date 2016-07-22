@@ -1,3 +1,3 @@
-# PR-in: a pagerank explorer tool
+# Boogie: interactive graph exploration using Bokeh plots
 
-Use Bokeh to plot pagerank vs in-degree for a variety of datasets.
+Use Bokeh to lay out graphs and explore them interactively.
