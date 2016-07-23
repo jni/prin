@@ -2,6 +2,11 @@
 
 import sys
 
-from boogie import plot
+try:  # assume Boogie has been installed
+    from boogie import plot
+except ImportError:  # assume running from repo directory
+    import os
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    sys.path.append(repo_root)
 
 plot.main(sys.argv[1:])
