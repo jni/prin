@@ -32,9 +32,9 @@ def compute_pagerank(network : nx.DiGraph, damping : float=0.85):
 def affinity_view(A, C, D, L):
     Dinv2 = D.copy()
     Dinv2.data = Dinv2.data ** (-.5)
-    Q = Dinv2 * L * Dinv2
+    Q = Dinv2 @ L @ Dinv2
     eigvals, vec = sparse.linalg.eigsh(Q, k=3, which='SM')
-    _, x, y = (Dinv2 * vec).T
+    _, x, y = (Dinv2 @ vec).T
     return x, y
 
 
