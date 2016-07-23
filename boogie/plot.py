@@ -13,16 +13,10 @@ import argparse
 import numpy as np
 import feather
 
-import toolz as tz
-from toolz import curried as c
-
 from matplotlib import cm
 import networkx as nx
 
-from scipy import sparse
-from skimage import io, filters, measure, morphology
 import pandas as pd
-from sklearn import decomposition, manifold
 
 from bokeh.models import (LassoSelectTool, PanTool,
                           ResizeTool, ResetTool,
@@ -32,29 +26,7 @@ from bokeh.models import ColumnDataSource
 from bokeh import plotting as bplot
 #from bokeh.plotting import figure, gridplot, output_file, show
 
-
-def pagerank_power(Trans, damping=0.85, max_iter=int(1e5)):
-    n = Trans.shape[0]
-    dangling = np.ravel(Trans.sum(axis=0) == 0) * (1/n)
-    r0 = np.full(n, 1/n)
-    r = r0
-    beta = (1 - damping) / n
-    for _ in range(max_iter):
-        rnext = damping * (Trans @ r + dangling @ r) + beta
-        if np.allclose(rnext, r):  # converged!
-            return rnext
-        else:
-            r = rnext
-    return r
-
-
-def compute_pagerank(network : nx.DiGraph, damping : float=0.85):
-    Adj = nx.to_scipy_sparse_matrix(network, dtype='float', format='csr')
-    deg = np.ravel(Adj.sum(axis=1))
-    Dinv = sparse.diags(1 / deg)
-    Trans = (Dinv @ Adj).T
-    pr = pagerank_power(Trans, damping=damping)
-    return pr
+from .spectral import compute_pagerank
 
 
 def network_properties(network : nx.DiGraph,
@@ -136,6 +108,66 @@ def bokeh_plot(df, output='plot.html', color=None, loglog=True):
         pagerank.circle('in_degree', 'pagerank', source=source)
     bplot.show(pagerank)
 
+
+from matplotlib import pyplot as plt
+from matplotlib import colors
+
+def plot_connectome(neuron_x, neuron_y, links, labels, types):
+    colormap = colors.ListedColormap([[0.   , 0.447, 0.698],
+                                      [0.   , 0.62 , 0.451],
+                                      [0.835, 0.369, 0.   ]])
+    # plot neuron locations:
+    plt.scatter(neuron_x, neuron_y, c=types, cmap=colormap,
+                edgecolors='face', zorder=1)
+
+    # add text labels:
+    for x, y, label in zip(neuron_x, neuron_y, labels):
+        plt.text(x, y, '  ' + label,
+                 horizontalalignment='left', verticalalignment='center',
+                 fontsize=5, zorder=2)
+
+    # plot links
+    pre, post = np.nonzero(links)
+    for src, dst in zip(pre, post):
+        plt.plot(neuron_x[[src, dst]], neuron_y[[src, dst]],
+                 c=(0.85, 0.85, 0.85), lw=0.2, alpha=0.5, zorder=0)
+
+    plt.show()
+
+
+def plot_dependencies(xs, ys, A, names, values=None, subsample=10,
+                      attenuation=2):
+    if values is None:
+        values = np.full(len(xs), 1/len(xs))
+    values = values ** (1 / attenuation)
+    values /= np.sum(values)  # normalize to sum to 1 for probabilities
+    if subsample:
+        indices = np.random.choice(np.arange(len(xs)), p=values,
+                                   size=len(xs) // subsample, replace=False)
+    else:
+        indices = np.arange(len(xs))
+    values = values[indices]
+    indices = indices[np.argsort(values)]  # plot low values first
+    values = np.sort(values) / np.max(values)  # normalize to max-1 for scaling
+    xs = xs[indices]
+    ys = ys[indices]
+    A = A[indices][:, indices]
+    names = [names[i] for i in indices]
+    colormap = plt.cm.plasma_r
+    plt.scatter(xs, ys, s=values*50, c=values,
+                cmap=colormap, alpha=0.5, zorder=1)
+
+    # add text labels
+    for x, y, label, val in zip(xs, ys, names, values):
+        plt.text(x, y, '   ' + label,
+                 horizontalalignment='left', verticalalignment='center',
+                 fontsize=12 * val, alpha=val, zorder=2)
+
+    pre, post = np.nonzero(A)
+    for src, dst in zip(pre, post):
+        plt.plot(xs[[src, dst]], ys[[src, dst]],
+                 c=(0.85, 0.85, 0.85), lw=0.2, alpha=0.5, zorder=0)
+    plt.show()
 
 def main(argv):
     args = _argument_parser().parse_args(argv)
