@@ -29,7 +29,7 @@ def compute_pagerank(network : nx.DiGraph, damping : float=0.85):
 
 
 
-def affinity_view(A, C, D, L):
+def affinity_view(D, L):
     Dinv2 = D.copy()
     Dinv2.data = Dinv2.data ** (-.5)
     Q = Dinv2 @ L @ Dinv2
@@ -47,23 +47,24 @@ def processing_depth(A, C, L):
         warnings.warn('CG illegal input or breakdown')
     return z
 
+
 def node_coordinates(graph, remove_nodes=None, nodelist=None):
     conn = max(nx.connected_components(graph.to_undirected()),
                key=len)
-    graph = graph.subgraph(conn)
+    subgraph = graph.subgraph(conn)
     if remove_nodes is not None:
-        graph.remove_nodes_from(remove_nodes)
-    graph.remove_edges_from(graph.selfloop_edges())
+        subgraph.remove_nodes_from(remove_nodes)
+    subgraph.remove_edges_from(subgraph.selfloop_edges())
     if nodelist is None:
-        names = graph.nodes()
+        names = subgraph.nodes()
     else:
         names = nodelist
-    A = nx.to_scipy_sparse_matrix(graph, nodelist=names)
+    A = nx.to_scipy_sparse_matrix(subgraph, nodelist=names)
     C = (A + A.T) / 2
     degrees = np.ravel(C.sum(axis=0))
     D = sparse.diags([degrees], [0]).tocsr()
     L = D - C
-    x, y = affinity_view(A, C, D, L)
+    x, y = affinity_view(D, L)
     z = processing_depth(A, C, L)
     return x, y, z, A, names
 
