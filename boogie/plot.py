@@ -13,6 +13,7 @@ import argparse
 import numpy as np
 import feather
 
+from scipy import sparse
 from matplotlib import cm
 import networkx as nx
 
@@ -26,7 +27,7 @@ from bokeh.models import ColumnDataSource
 from bokeh import plotting as bplot
 #from bokeh.plotting import figure, gridplot, output_file, show
 
-from .spectral import compute_pagerank
+from .spectral import compute_pagerank, node_coordinates
 
 
 def network_properties(network : nx.DiGraph,
@@ -112,6 +113,7 @@ def bokeh_plot(df, output='plot.html', color=None, loglog=True):
 from matplotlib import pyplot as plt
 from matplotlib import colors
 
+
 def plot_connectome(neuron_x, neuron_y, links, labels, types):
     colormap = colors.ListedColormap([[0.   , 0.447, 0.698],
                                       [0.   , 0.62 , 0.451],
@@ -168,6 +170,7 @@ def plot_dependencies(xs, ys, A, names, values=None, subsample=10,
         plt.plot(xs[[src, dst]], ys[[src, dst]],
                  c=(0.85, 0.85, 0.85), lw=0.2, alpha=0.5, zorder=0)
     plt.show()
+
 
 def main(argv):
     args = _argument_parser().parse_args(argv)

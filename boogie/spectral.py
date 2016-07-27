@@ -49,7 +49,7 @@ def processing_depth(A, C, L):
     return z
 
 
-def node_coordinates(graph, remove_nodes=None, nodelist=None):
+def node_coordinates(graph, remove_nodes=None, nodelist=None, offset=0):
     conn = max(nx.connected_components(graph.to_undirected()),
                key=len)
     subgraph = graph.subgraph(conn)
@@ -60,14 +60,14 @@ def node_coordinates(graph, remove_nodes=None, nodelist=None):
         names = subgraph.nodes()
     else:
         names = nodelist
-    A = nx.to_scipy_sparse_matrix(subgraph, nodelist=names)
-    C = (A + A.T) / 2
-    degrees = np.ravel(C.sum(axis=0))
-    D = sparse.diags([degrees], [0]).tocsr()
-    L = D - C
-    x, y = affinity_view(D, L)
-    z = processing_depth(A, C, L)
-    return x, y, z, A, names
+    Adj = nx.to_scipy_sparse_matrix(subgraph, nodelist=names)
+    Conn = (Adj + Adj.T) / 2 + sparse.diags(np.full(Adj.shape[0], offset))
+    degrees = np.ravel(Conn.sum(axis=0))
+    Deg = sparse.diags([degrees], [0]).tocsr()
+    Lap = Deg - Conn
+    x, y = affinity_view(Deg, Lap)
+    z = processing_depth(Adj, Conn, Lap)
+    return x, y, z, Adj, names
 
 
 def coo_mat_concat(matrices, spformat='csr'):
