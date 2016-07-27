@@ -59,10 +59,11 @@ def network_properties(network : nx.DiGraph,
     return df, Adj
 
 
-def _bokeh_colormap(series, cmap='viridis', stretch=True):
+def _bokeh_colormap(series, cmap='viridis', stretch=True, mode=(lambda x: x)):
     if stretch:
         series = ((series - series.min()) /
                   (series.max() - series.min()))
+    series = mode(series)
     colors_raw = cm.get_cmap(cmap)(series, bytes=True)
     colors_str = ['#%02x%02x%02x' % tuple(c[:3]) for c in colors_raw]
     return colors_str
