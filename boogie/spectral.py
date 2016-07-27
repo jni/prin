@@ -69,3 +69,23 @@ def node_coordinates(graph, remove_nodes=None, nodelist=None):
     return x, y, z, A, names
 
 
+def node_coordinates_robust(graph):
+    xs, ys, zs, As, namess = [], [], [], [], []
+    for cc in nx.connected_component_subgraphs(graph.to_undirected()):
+        if len(cc) == 1:
+            x, y, z = [0], [0], [0]
+            A = [[0]]
+            names = cc.nodes()
+        elif len(cc) == 2:
+            x, y, z = [0, 1], [0, 1], [0, 1]
+            n1, n2 = cc.nodes()
+            A = np.array([[0, 1], [1, 0]]) * cc[n1][n2].get('weight', 1)
+            names = cc.nodes()
+        else:
+            x, y, z, A, names = node_coordinates(cc)
+        xs.append(x)
+        ys.append(y)
+        zs.append(z)
+        As.append(A)
+        namess.append(names)
+    return xs, ys, zs, As, namess
