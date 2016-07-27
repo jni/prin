@@ -34,7 +34,8 @@ def network_properties(network : nx.DiGraph,
                        in_degree_threshold : float = -1,
                        pagerank_threshold : float = -1,
                        damping : float = 0.85,
-                       values=[]) -> pd.DataFrame:
+                       spectral_offset : float = 0.5)\
+        -> (pd.DataFrame, sparse.spmatrix):
     conn = max(nx.connected_components(network.to_undirected()), key=len)
     conn = nx.subgraph(network, conn)
     pr = compute_pagerank(conn, damping=damping)
@@ -42,15 +43,20 @@ def network_properties(network : nx.DiGraph,
     indeg = [conn.in_degree(n) for n in names]
     odeg = [conn.out_degree(n) for n in names]
     description = [conn.node[n].get('description', n) for n in names]
+    x, y, z, Adj, aff_names = node_coordinates(conn, nodelist=names,
+                                               offset=spectral_offset)
     data = {'id': names,
             'in_degree': indeg,
             'out_degree': odeg,
             'pagerank': pr,
+            'affinity_x': x,
+            'affinity_y': y,
+            'processing_depth': z,
             'description': description}
     df = pd.DataFrame(data, index=names)
     df = df[df['pagerank'] > pagerank_threshold / len(names)]
     df = df[df['in_degree'] > in_degree_threshold]
-    return df
+    return df, Adj
 
 
 def _bokeh_colormap(series, cmap='viridis', stretch=True):
@@ -81,6 +87,9 @@ def _argument_parser():
                                            'scale for the scatterplot')
     parser.add_argument('-d', '--damping', type=float, default=0.85,
                         help='Damping value for pagerank computation.')
+    parser.add_argument('-O', '--spectral-offset', type=float, default=0.5,
+                        help='Offset to apply to Laplacian diagonal for '
+                             'eigenvalue stabilization.')
     parser.add_argument('-D', '--data-frame', type=str,
                         help='Save resulting data frame to this file.')
     return parser
