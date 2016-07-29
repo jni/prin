@@ -35,7 +35,8 @@ def affinity_view(D, L):
     Dinv2.data = Dinv2.data ** (-.5)
     Q = Dinv2 @ L @ Dinv2
     eigvals, vec = sparse.linalg.eigsh(Q, k=3, which='SM')
-    _, x, y = (Dinv2 @ vec).T
+    ordering = np.argsort(eigvals)
+    _, x, y = (Dinv2 @ vec[:, ordering]).T
     return x, y
 
 
