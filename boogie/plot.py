@@ -19,12 +19,13 @@ import networkx as nx
 
 import pandas as pd
 
-from bokeh.models import (LassoSelectTool, PanTool,
+from bokeh.models import (BoxSelectTool, Select, PanTool,
                           ResizeTool, ResetTool,
                           HoverTool, WheelZoomTool)
-TOOLS = [LassoSelectTool, PanTool, WheelZoomTool, ResizeTool, ResetTool]
+TOOLS = [BoxSelectTool, PanTool, WheelZoomTool, ResizeTool, ResetTool]
 from bokeh.models import ColumnDataSource
 from bokeh import plotting as bplot
+from bokeh import layouts
 #from bokeh.plotting import figure, gridplot, output_file, show
 
 from .spectral import compute_pagerank, node_coordinates
@@ -118,6 +119,17 @@ def bokeh_plot(df, output='plot.html', color=None, loglog=True):
     else:
         pagerank.circle('in_degree', 'pagerank', source=source)
     bplot.show(pagerank)
+
+
+def serve(datasource, output='plot.html'):
+    columns = list(datasource.keys())
+    positive_vars = [k for k in columns if np.all(datasource[k] > 0)]
+    x = Select(title='X-Axis', value='in_degree',
+               options=columns)
+    y = Select(title='Y-Axis', value='pagerank',
+               options=columns)
+    size = Select(title='Size', value='None',
+                  options=['None'])
 
 
 from matplotlib import pyplot as plt
