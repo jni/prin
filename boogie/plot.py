@@ -118,10 +118,10 @@ def bokeh_plot(df, output='plot.html', color=None, loglog=True):
         pagerank.circle('in_degree', 'pagerank', color='color', source=source)
     else:
         pagerank.circle('in_degree', 'pagerank', source=source)
-    bplot.show(pagerank)
+    return pagerank
 
 
-def serve(datasource, output='plot.html'):
+def serve(datasource):
     columns = list(datasource.keys())
     positive_vars = [k for k in columns if np.all(datasource[k] > 0)]
     x = Select(title='X-Axis', value='in_degree',
@@ -129,7 +129,12 @@ def serve(datasource, output='plot.html'):
     y = Select(title='Y-Axis', value='pagerank',
                options=columns)
     size = Select(title='Size', value='None',
-                  options=['None'])
+                  options=['None'] + positive_vars)
+    color = Select(title='Color', value='None',
+                    options=['None'] + columns)
+    controls = layouts.widgetbox([x, y, color, size], width=200)
+    plot = bokeh_plot(datasource)
+    document = layouts.row(controls, plot)
 
 
 from matplotlib import pyplot as plt
